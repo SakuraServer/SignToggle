@@ -4,9 +4,7 @@
  */
 package net.ja731j.signtoggle;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -44,17 +42,17 @@ public class SignToggle extends JavaPlugin implements Listener {
         if (!(sender instanceof Player) || !cmd.getName().equalsIgnoreCase("signtoggle")) {
             return false;
         }
-        Player p = (Player)sender;
-        if(!p.hasPermission("signtoggle")){
+        Player p = (Player) sender;
+        if (!p.hasPermission("signtoggle")) {
             p.sendMessage("You don't have the permissions!");
             return true;
         }
-        
+
         if (inuse.contains(sender.getName())) {
-            Bukkit.broadcastMessage("Disabled SignToggle");
+            p.sendMessage("Disabled SignToggle");
             inuse.remove(sender.getName());
         } else {
-            Bukkit.broadcastMessage("Enabled SignToggle");
+            p.sendMessage("Enabled SignToggle");
             inuse.add(sender.getName());
         }
         return true;
@@ -62,43 +60,45 @@ public class SignToggle extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onHit(PlayerInteractEvent e) {
-        Block b = e.getClickedBlock();
 
         if (e.getPlayer() == null || !e.getPlayer().hasPermission("signtoggle")) {
             return;
         }
 
+        //If not enabled don't proceed
         if (!inuse.contains(e.getPlayer().getName())) {
             return;
         }
 
-        if (b != null) {
+        Block b = e.getClickedBlock();
+
+        //If target block is not null and is some kind of sign, proceed
+        if (b != null
+                && (b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN_POST)) {
+
+            //Get sign data
+            org.bukkit.block.Sign s = (org.bukkit.block.Sign) b.getState();
+            String[] lines = s.getLines();
+            BlockFace face = ((org.bukkit.material.Sign) (s.getData())).getFacing();
+
+            //Switch between sign posts and wall signs
             if (b.getType() == Material.WALL_SIGN) {
-                org.bukkit.block.Sign s = (org.bukkit.block.Sign) b.getState();
-                String[] lines = s.getLines();
-                BlockFace face = ((org.bukkit.material.Sign) (s.getData())).getFacing();
-
                 b.setType(Material.SIGN_POST);
-                s = (org.bukkit.block.Sign) b.getState();
-                ((org.bukkit.material.Sign) (s.getData())).setFacingDirection(face);
-                for (int i = 0; i < 4; i++) {
-
-                    s.setLine(i, lines[i]);
-                }
-                s.update();
-            } else if (b.getType() == Material.SIGN_POST) {
-                org.bukkit.block.Sign s = (org.bukkit.block.Sign) b.getState();
-                String[] lines = s.getLines();
-                BlockFace face = ((org.bukkit.material.Sign) (s.getData())).getFacing();
-
+            } else {
                 b.setType(Material.WALL_SIGN);
-                s = (org.bukkit.block.Sign) b.getState();
-                ((org.bukkit.material.Sign) (s.getData())).setFacingDirection(face);
-                for (int i = 0; i < 4; i++) {
-                    s.setLine(i, lines[i]);
-                }
-                s.update();
             }
+
+            //Get block.Sign again because it has changed
+            s = (org.bukkit.block.Sign) b.getState();
+            
+            //Set sign data
+            ((org.bukkit.material.Sign) (s.getData())).setFacingDirection(face);
+            for (int i = 0; i < 4; i++) {
+
+                s.setLine(i, lines[i]);
+            }
+            s.update();
+
         }
 
     }
