@@ -1,0 +1,13 @@
+name: SignToggle
+main: net.ja731j.signtoggle.SignToggle
+authors: ['ja731j']
+version: 1.0-SNAPSHOT
+commands:
+  signtoggle:
+    description: Singtoggle Commands
+    usage: |
+            /signtoggle
+permissions:
+  signtoggle:
+    description: Allows you to toggle between sign posts and signs
+    default: op
