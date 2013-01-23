@@ -8,6 +8,6 @@ commands:
     usage: |
             /signtoggle
 permissions:
-  signtoggle:
+  signtoggle.use:
     description: Allows you to toggle between sign posts and signs
     default: op
